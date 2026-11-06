@@ -24,10 +24,14 @@ export function createProfileView(root, ctx) {
     root.querySelector('.profile-content').innerHTML = user ? signedIn(user) : signedOut();
     if (user) {
       wireSettings();
-      renderSubjects(user.uid);
-      watchSubjects(user.uid, (subs) => {
-        renderSubjects(user.uid);
-      });
+      // Render user subjects from current state (element was just re-created)
+      renderSubjects(ctx.state.subjects || []);
+      // Watch user subjects only once, manage unsubscribe to avoid duplicates
+      if (!subjectsUnsub) {
+        subjectsUnsub = watchSubjects(user.uid, (subs) => {
+          renderSubjects(user.uid, subs);
+        });
+      }
     } else if (subjectsUnsub) {
       subjectsUnsub();
       subjectsUnsub = null;
@@ -89,10 +93,17 @@ export function createProfileView(root, ctx) {
     </section>`;
   }
 
-  function renderSubjects(uid) {
+  function renderSubjects(uid, subjects = []) {
     const host = root.querySelector('#subject-list');
     if (!host) return;
-    host.innerHTML = '';
+    host.innerHTML = subjects.map((s) => `
+      <div class="subject-item" data-subject-id="${esc(s.id)}">
+        <div class="name"><span class="dot" style="background:${esc(s.color || '#8e919b')}"></span>${esc(s.name)}</div>
+        <div class="actions">
+          <button class="icon-btn" data-act="delete-subject" data-subject-id="${esc(s.id)}" aria-label="Fach ${esc(s.name)} löschen">${icon('delete', 16)}</button>
+        </div>
+      </div>
+    `).join('');
   }
 
   function addSubjectDialog(uid) {

@@ -32,16 +32,16 @@ export const subjectColor = (subject, userSubjects = []) => {
   return null; // null bedeutet: "custom subject" -> Karte wird --s inline setzen
 };
 
-// Liefert CSS-Klasse und Farbe für --s Variable basierend auf userSubjects
+// Liefert CSS-Klasse und Farbe für --s Variable basierend auf userSubjects.
+// Built-in Fächer: keine Inline-Farbe (CSS-Klasse regelt Theme-awareness).
+// Custom Fächer: Farbe wird inline via style="--s: #hex" gesetzt.
 export const getSubjectVars = (subject, userSubjects = []) => {
   const key = subjectKey(subject);
   const color = subjectColor(subject, userSubjects);
 
-  // Built-in Fächer (alle in KEYS definiert) nutzen CSS-Klasse
-  if (KEYS[subject] && color) {
-    return { class: `subj-${key}`, color };
+  if (KEYS[subject]) {
+    return { class: `subj-${key}`, color: null };
   }
 
-  // Benutzer-Fach: nutzt --s inline via .subj-custom + style="--s: #hex"
   return { class: 'subj-custom', color };
 };
