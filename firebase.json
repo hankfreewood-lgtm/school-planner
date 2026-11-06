@@ -1,4 +1,4 @@
-{
+﻿{
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
@@ -31,6 +31,14 @@
         ]
       }
     ]
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Schulplaner",
+        "supportEmail": "hank.freewood@web.de"
+      }
+    }
   },
   "emulators": {
     "auth": { "port": 9099 },
