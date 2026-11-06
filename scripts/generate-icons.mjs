@@ -51,7 +51,7 @@ const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 function render(size, { scale, rounded }) {
   const buf = Buffer.alloc(size * size * 4);
   const SS = 3;
-  const c1 = [74, 96, 190], c2 = [40, 58, 140];
+  const c1 = [61, 95, 52], c2 = [26, 44, 22];
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       let r = 0, g = 0, b = 0, a = 0;
@@ -74,11 +74,11 @@ function render(size, { scale, rounded }) {
                 distSeg(u, v, m(0.405), m(0.505), m(0.468), m(0.575)),
                 distSeg(u, v, m(0.468), m(0.575), m(0.60), m(0.43)),
               );
-              if (d < th) col = [60, 85, 168];
+              if (d < th) col = [60, 90, 50];
               // Textzeilen
               const lineY = [0.66, 0.73];
               for (const ly of lineY) {
-                if (sdRoundRect(u, v, 0.5, 0.5 + (ly - 0.5) * k, 0.12 * k, 0.012 * k, 0.012 * k) < 0) col = [196, 204, 232];
+                if (sdRoundRect(u, v, 0.5, 0.5 + (ly - 0.5) * k, 0.12 * k, 0.012 * k, 0.012 * k) < 0) col = [200, 214, 186];
               }
             }
           }
@@ -100,4 +100,4 @@ write('icon-maskable-512.png', render(512, { scale: 0.78, rounded: false }));
 write('apple-touch-icon.png', render(180, { scale: 0.9, rounded: false }));
 write('favicon-32.png', render(32, { scale: 1, rounded: true }));
 
-write('icon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a60be"/><stop offset="1" stop-color="#283a8c"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><rect x="128" y="102" width="256" height="308" rx="36" fill="#fafbff"/><path d="M207 258l32 36 69-74" fill="none" stroke="#3c55a8" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><rect x="194" y="338" width="124" height="12" rx="6" fill="#c4cce8"/><rect x="194" y="372" width="124" height="12" rx="6" fill="#c4cce8"/></svg>`);
+write('icon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d5f34"/><stop offset="1" stop-color="#1a2c16"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><rect x="128" y="102" width="256" height="308" rx="36" fill="#fafbff"/><path d="M207 258l32 36 69-74" fill="none" stroke="#3c5a32" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><rect x="194" y="338" width="124" height="12" rx="6" fill="#c2d6b6"/><rect x="194" y="372" width="124" height="12" rx="6" fill="#c2d6b6"/></svg>`);

@@ -60,6 +60,14 @@ $$('[data-icon]').forEach((el) => { el.innerHTML = icon(el.dataset.icon, 24); })
 
 const renderAll = () => Object.values(views).forEach((v) => v.render());
 
+function renderToday() {
+  const el = $('#appbar-date');
+  if (!el) return;
+  const label = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+  el.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+}
+renderToday();
+
 /* ---------------- Navigation ---------------- */
 function showTab(tab, { push = true } = {}) {
   if (!TABS[tab]) tab = 'homework';
@@ -177,6 +185,7 @@ function checkDay() {
   state.today = t;
   startData();     // Abfragegrenzen neu setzen
   renderAll();
+  renderToday();
 }
 function scheduleMidnight() {
   setTimeout(() => { checkDay(); scheduleMidnight(); }, msUntilNextMidnight());

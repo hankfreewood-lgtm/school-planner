@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="de" data-theme="light">
+<html lang="de" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Schulplaner</title>
   <meta name="description" content="Schulplaner: Hausaufgaben und Tests übersichtlich verwalten.">
-  <meta name="theme-color" content="#f6f7fb">
-  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0b100b">
+  <meta name="color-scheme" content="dark light">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Schulplaner">
@@ -20,12 +20,12 @@
     (function () {
       try {
         var t = localStorage.getItem('sp-theme');
-        var dark = t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+        var dark = t === 'system' ? matchMedia('(prefers-color-scheme: dark)').matches : t !== 'light';
         var r = document.documentElement;
         r.dataset.theme = dark ? 'dark' : 'light';
         r.style.colorScheme = dark ? 'dark' : 'light';
         r.dataset.tint = localStorage.getItem('sp-tint') === '0' ? 'off' : 'on';
-        document.querySelector('meta[name="theme-color"]').content = dark ? '#121316' : '#f6f7fb';
+        document.querySelector('meta[name="theme-color"]').content = dark ? '#0b100b' : '#efeee8';
       } catch (e) {}
     })();
   </script>
@@ -44,7 +44,10 @@
 
     <div class="main">
       <header class="appbar">
-        <h1 id="title">Hausaufgaben</h1>
+        <div class="appbar-titles">
+          <p class="appbar-date" id="appbar-date"></p>
+          <h1 id="title">Hausaufgaben</h1>
+        </div>
         <div id="status" class="status" role="status" hidden></div>
       </header>
 

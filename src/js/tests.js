@@ -9,6 +9,7 @@ function card(t, today) {
   const cd = countdown(t.testDate, today);
   return `<article class="card test subj-${subjectKey(t.subject)}" data-id="${esc(t.id)}">
     <span class="accent" aria-hidden="true"></span>
+    <span class="subj-icon" aria-hidden="true">${icon('tests', 20)}</span>
     <div class="card-body" data-act="edit" role="button" tabindex="0" aria-label="Bearbeiten: ${esc(t.subject)}-Test">
       <div class="meta">
         <span class="badge">${esc(t.subject)}</span>

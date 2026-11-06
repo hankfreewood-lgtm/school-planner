@@ -1,7 +1,7 @@
-{
+﻿{
   "name": "Schulplaner",
   "short_name": "Schulplaner",
-  "description": "Hausaufgaben und Tests übersichtlich verwalten.",
+  "description": "Hausaufgaben und Tests Ã¼bersichtlich verwalten.",
   "lang": "de",
   "dir": "ltr",
   "id": "/",
@@ -9,8 +9,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#f6f7fb",
-  "theme_color": "#f6f7fb",
+  "background_color": "#0b100b",
+  "theme_color": "#0b100b",
   "categories": ["education", "productivity"],
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
@@ -23,3 +23,4 @@
     { "name": "Tests", "url": "/#tests", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }
+

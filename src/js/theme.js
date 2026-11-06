@@ -6,7 +6,7 @@ const listeners = new Set();
 
 export const getTheme = () => {
   const t = localStorage.getItem(KEY);
-  return t === 'light' || t === 'dark' ? t : 'system';
+  return t === 'light' || t === 'dark' || t === 'system' ? t : 'dark';
 };
 export const getTint = () => localStorage.getItem(TINT_KEY) !== '0';
 
@@ -20,7 +20,7 @@ export function applyTheme(theme = getTheme()) {
   root.dataset.theme = r;
   root.style.colorScheme = r;
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.content = r === 'dark' ? '#121316' : '#f6f7fb';
+  if (meta) meta.content = r === 'dark' ? '#0b100b' : '#efeee8';
   root.dataset.tint = getTint() ? 'on' : 'off';
 }
 

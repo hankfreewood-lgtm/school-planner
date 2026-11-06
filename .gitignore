@@ -1,3 +1,7 @@
+# taste-skill (nur lokal zum Entwickeln)
+.taste-skill/
+taste-skill/
+
 node_modules/
 dist/
 .firebase/
