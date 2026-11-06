@@ -217,6 +217,19 @@ firebase deploy --only hosting
 
 ---
 
+## Bewusste Entscheidungen
+
+Zwei Anforderungen widersprechen sich – hier die gewählte Auflösung, jeweils über eine Konstante steuerbar (`src/js/dates.js`):
+
+- **Tests ab Testdatum ausblenden vs. Countdown „Heute“:** Die Ausblendung hat Vorrang, deshalb ist `TEST_VISIBLE_UNTIL_DAYS_BEFORE = 1` (ein Test ist am Tag davor sichtbar, ab dem Testdatum nicht mehr). Der Countdown kennt „Heute“ weiterhin, wird für sichtbare Tests aber nie erreicht. Wer den Test am Testtag sehen will, setzt den Wert auf `0`.
+- **Überfällige Hausaufgaben vs. Ausblenden nach Fälligkeit:** Die Ausblendung hat Vorrang, `HOMEWORK_GRACE_DAYS = 0` (sichtbar bis einschließlich Fälligkeitstag, ab dem Folgetag ausgeblendet). Die Sortiergruppe „Überfällig“ und das Badge sind implementiert und erscheinen automatisch, sobald `HOMEWORK_GRACE_DAYS` z. B. auf `2` gesetzt wird.
+- **Datumsfelder** werden als `JJJJ-MM-TT` ohne Uhrzeit gespeichert und rein kalendarisch gerechnet – dadurch keine Zeitzonen-/Sommerzeit-Fehler. Anzeige immer `TT.MM.JJJJ`.
+- **Theme** wird lokal in `localStorage` gespeichert und vor dem ersten Rendern inline angewendet (kein Flash). Zusätzlich wird es – wenn angemeldet – in Firestore gespiegelt und auf anderen Geräten übernommen.
+- **Firestore-Offline:** Persistent Cache in IndexedDB; Schreibvorgänge werden lokal gepuffert und automatisch synchronisiert. `settle()` in `store.js` verhindert, dass die UI offline blockiert.
+
+
+---
+
 ## Lizenz
 
 Privates Schulprojekt. Nutzung auf eigene Verantwortung.
