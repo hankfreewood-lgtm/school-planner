@@ -1,0 +1,9 @@
+/* DM Sans (variabel: opsz 9–40, wght 100–1000), lokal gehostet – kein externer Font-Request. */
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/dm-sans-var.woff2') format('woff2-variations'),
+       url('/fonts/dm-sans-var.woff2') format('woff2');
+  font-weight: 100 1000;
+  font-style: normal;
+  font-display: swap;
+}

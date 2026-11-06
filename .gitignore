@@ -10,3 +10,7 @@ ui-debug.log
 *-service-account*.json
 serviceAccount*.json
 .DS_Store
+
+# Schrift-Quellarchiv (nicht benötigt, WOFF2 liegt in public/fonts)
+DM_Sans.zip
+DM_Sans/

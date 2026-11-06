@@ -37,6 +37,7 @@ Mathematik blau · Deutsch rot · Englisch violett · Biologie grün · Chemie t
 - **Firebase**: Authentication (Google), Cloud Firestore, Hosting
 - **GitHub Actions** für automatisches Deployment
 - **Web App Manifest + eigener Service Worker**
+- **DM Sans** (variable Schrift, lokal als WOFF2 gehostet, keine externen Font-Requests; Lizenz OFL, siehe `public/fonts/OFL.txt`)
 - Tests: `node:test` (Datums-/Sortierlogik) und `@firebase/rules-unit-testing` (Security Rules)
 
 ---
@@ -50,9 +51,11 @@ school-planner/
 │   ├── manifest.webmanifest
 │   ├── sw.js                   Service Worker
 │   ├── offline.html            Offline-Fallback
+│   ├── fonts/                  DM Sans (WOFF2, variabel) + OFL-Lizenz
 │   └── icons/                  generierte PNG/SVG-Icons
 ├── src/
 │   ├── css/
+│   │   ├── fonts.css           @font-face (DM Sans, lokal)
 │   │   ├── style.css           Tokens-Import, Layout, Navigation
 │   │   ├── themes.css          Light-/Dark-Tokens, Fachfarben
 │   │   └── components.css      Karten, Sheets, Buttons, Profil …

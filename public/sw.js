@@ -6,7 +6,7 @@
  *   damit nach jedem Deployment neu vorab gecacht wird.
  */
 const CACHE = 'schulplaner-v1';
-const SHELL = ['/', '/offline.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon.svg'];
+const SHELL = ['/', '/offline.html', '/manifest.webmanifest', '/fonts/dm-sans-var.woff2', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon.svg'];
 
 async function precache() {
   const cache = await caches.open(CACHE);
