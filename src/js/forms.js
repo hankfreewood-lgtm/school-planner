@@ -22,11 +22,16 @@ const CONFIG = {
  * Öffnet das Bottom Sheet zum Anlegen/Bearbeiten.
  * onSave(data) und onDelete() liefern Promises; bei Fehler bleibt das Sheet offen.
  */
-export function openEntryForm({ kind, entry = null, today, onSave, onDelete }) {
+export function openEntryForm({ kind, entry = null, today, onSave, onDelete, userSubjects = [] }) {
   const c = CONFIG[kind];
   const isEdit = !!entry;
   const val = entry || {};
-  const options = SUBJECTS.map((s) => `<option value="${esc(s)}" ${val.subject === s ? 'selected' : ''}>${esc(s)}</option>`).join('');
+
+  // Subject-Dropdown: built-in + user subjects
+  const builtInOptions = SUBJECTS.map((s) => `<option value="${esc(s)}" ${val.subject === s ? 'selected' : ''}>${esc(s)}</option>`).join('');
+  const userOptions = userSubjects.map((s) => `<option value="${esc(s.name)}" ${val.subject === s.name ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
+  const subjectOptions = builtInOptions + userOptions;
+
   // Neue Einträge in der Vergangenheit wären sofort ausgeblendet → Mindestdatum.
   const minDate = kind === 'test' ? addDaysISO(today, 1) : today;
   const chips = kind === 'test'
@@ -40,16 +45,25 @@ export function openEntryForm({ kind, entry = null, today, onSave, onDelete }) {
         <button type="button" class="icon-btn" data-close aria-label="Schließen">${icon('close')}</button>
       </div>
 
+      <!-- Feld 1: Thema/Inhalt -->
+      <div class="field">
+        <label for="f-text">${c_labels[kind].textLabel}</label>
+        <textarea id="f-text" name="text" rows="3" maxlength="1000" placeholder="${esc(c.placeholder)}" required>${esc(val[c.textField] || '')}</textarea>
+        <p class="field-error" data-err="text" hidden></p>
+      </div>
+
+      <!-- Feld 2: Fach -->
       <div class="field">
         <label for="f-subject">Fach</label>
         <div class="select-wrap">
           <select id="f-subject" name="subject" required>
-            <option value="" disabled ${val.subject ? '' : 'selected'}>Fach wählen …</option>${options}
+            <option value="" disabled ${val.subject ? '' : 'selected'}>Fach wählen …</option>${subjectOptions}
           </select>
         </div>
         <p class="field-error" data-err="subject" hidden></p>
       </div>
 
+      <!-- Feld 3: Datum -->
       <div class="field">
         <label for="f-date">${c.dateLabel}</label>
         <input id="f-date" name="date" type="date" required ${isEdit ? '' : `min="${minDate}"`} value="${esc(val[c.dateField] || '')}">
@@ -57,12 +71,6 @@ export function openEntryForm({ kind, entry = null, today, onSave, onDelete }) {
           ${chips.map(([l, n]) => `<button type="button" class="chip-btn" data-days="${n}">${l}</button>`).join('')}
         </div>
         <p class="field-error" data-err="date" hidden></p>
-      </div>
-
-      <div class="field">
-        <label for="f-text">${c.textLabel}</label>
-        <textarea id="f-text" name="text" rows="3" maxlength="1000" placeholder="${esc(c.placeholder)}" required>${esc(val[c.textField] || '')}</textarea>
-        <p class="field-error" data-err="text" hidden></p>
       </div>
 
       <div class="sheet-actions">
@@ -97,7 +105,7 @@ export function openEntryForm({ kind, entry = null, today, onSave, onDelete }) {
     const date = dateInput.value;
     const text = form.elements.text.value.trim();
     let ok = true;
-    if (!SUBJECTS.includes(subject)) { showErr('subject', 'Bitte ein Fach auswählen.'); ok = false; }
+    if (!SUBJECTS.includes(subject) && !userSubjects.some((s) => s.name === subject)) { showErr('subject', 'Bitte ein Fach auswählen.'); ok = false; }
     if (!isValidISO(date)) { showErr('date', 'Bitte ein Datum auswählen.'); ok = false; }
     if (!text) { showErr('text', kind === 'test' ? 'Bitte ein Thema eintragen.' : 'Bitte beschreibe die Aufgabe.'); ok = false; }
     if (!ok) { form.querySelector('.field-error:not([hidden])')?.closest('.field').querySelector('select,input,textarea').focus(); return; }
@@ -119,5 +127,11 @@ export function openEntryForm({ kind, entry = null, today, onSave, onDelete }) {
     try { await onDelete(); closeSheet(); } catch (err) { setBusy(false); showErr('text', err.userMessage || 'Löschen fehlgeschlagen.'); }
   });
 
-  if (!isEdit) setTimeout(() => form.elements.subject.focus(), 120);
+  if (!isEdit) setTimeout(() => form.elements.text.focus(), 120);
 }
+
+// Feld-Labels per Kind (für Reihenfolge: Thema → Fach → Datum)
+const c_labels = {
+  homework: { textLabel: 'Inhalt' },
+  test: { textLabel: 'Thema' },
+};

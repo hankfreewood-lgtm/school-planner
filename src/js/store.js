@@ -78,6 +78,29 @@ export const savePrefs = (uid, prefs) =>
     { merge: true },
   );
 
+/* ---------------- User-Fächer (benutzerdefinierte Fächer mit Farbe) ---------------- */
+export function watchSubjects(uid, onData, onError) {
+  return onSnapshot(
+    collection(db, 'users', uid, 'subjects'),
+    (snap) => onData(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    onError,
+  );
+}
+
+export function saveSubject(uid, id, { name, color }) {
+  return setDoc(
+    doc(db, 'users', uid, 'subjects', id),
+    { name, color, createdAt: serverTimestamp(), updatedAt: serverTimestamp() },
+    { merge: true },
+  );
+}
+
+export function deleteSubject(uid, id) {
+  return deleteDoc(doc(db, 'users', uid, 'subjects', id));
+}
+
+export const newSubjectId = (uid) => doc(collection(db, 'users', uid, 'subjects')).id;
+
 /**
  * Wartet auf die Server-Bestätigung, aber höchstens `ms` – offline blockiert die UI nie.
  * Fehler (z. B. permission-denied) werden weitergereicht.

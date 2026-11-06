@@ -4,15 +4,18 @@ import { subjectKey } from './subjects.js';
 import { formatDE, weekdayLong, isTestVisible, sortTests, countdown } from './dates.js';
 import { openEntryForm } from './forms.js';
 import * as store from './store.js';
+import { getSubjectVars } from './subjects.js';
 
-function card(t, today) {
+function card(t, today, userSubjects) {
   const cd = countdown(t.testDate, today);
-  return `<article class="card test subj-${subjectKey(t.subject)}" data-id="${esc(t.id)}">
+  const subj = getSubjectVars(t.subject, userSubjects);
+  const style = subj.color ? `style="--s: ${subj.color}"` : '';
+  return `<article class="card test ${subj.class}" data-id="${esc(t.id)}" ${style}>
     <span class="accent" aria-hidden="true"></span>
     <span class="subj-icon" aria-hidden="true">${icon('tests', 20)}</span>
     <div class="card-body" data-act="edit" role="button" tabindex="0" aria-label="Bearbeiten: ${esc(t.subject)}-Test">
       <div class="meta">
-        <span class="badge">${esc(t.subject)}</span>
+        <span class="badge subj-${subjectKey(t.subject)}">${esc(t.subject)}</span>
       </div>
       <p class="text">${esc(t.topic)}</p>
       <p class="date">${icon('event', 16)}<span>${weekdayLong(t.testDate)}, ${formatDE(t.testDate)}</span></p>
@@ -32,7 +35,7 @@ export function createTestsView(root, ctx) {
     if (list.querySelector('.skeleton')) list.innerHTML = '';
 
     const sorted = sortTests(state.tests.filter((t) => isTestVisible(t.testDate, state.today)));
-    reconcile(list, sorted.map((t) => ({ key: t.id, html: card(t, state.today) })));
+    reconcile(list, sorted.map((t) => ({ key: t.id, html: card(t, state.today, state.subjects) })));
     empty.innerHTML = sorted.length === 0
       ? emptyState('tests', 'Keine anstehenden Tests.', 'Sobald eine Klassenarbeit angekündigt wird, trage sie hier ein.',
         `<button class="btn tonal" data-act="add">${icon('add', 20)}Test hinzufügen</button>`)
@@ -46,7 +49,7 @@ export function createTestsView(root, ctx) {
     if (!u) return;
     const id = entry?.id || store.newId(u, 'tests');
     openEntryForm({
-      kind: 'test', entry, today: ctx.state.today,
+      kind: 'test', entry, today: ctx.state.today, userSubjects: ctx.state.subjects,
       onSave: async (data) => {
         const res = await wrap(store.settle(store.saveTest(u, id, data, !entry), ctx.lateError));
         toast(res === 'saved' ? (entry ? 'Änderungen gespeichert' : 'Test gespeichert') : 'Offline gespeichert – wird synchronisiert', { type: 'success' });

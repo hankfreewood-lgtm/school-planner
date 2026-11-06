@@ -4,19 +4,22 @@ import { subjectKey } from './subjects.js';
 import { formatDE, weekdayShort, isHomeworkVisible, sortHomework, homeworkGroup, homeworkBadge, HOMEWORK_GRACE_DAYS } from './dates.js';
 import { openEntryForm } from './forms.js';
 import * as store from './store.js';
+import { getSubjectVars } from './subjects.js';
 
 const GROUP_TITLES = ['Überfällig', 'Heute fällig', 'Demnächst', 'Erledigt'];
 
-function card(hw, today) {
+function card(hw, today, userSubjects) {
   const badge = homeworkBadge(hw, today);
   const done = hw.completed;
-  return `<article class="card subj-${subjectKey(hw.subject)} ${done ? 'done' : ''}" data-id="${esc(hw.id)}">
+  const subj = getSubjectVars(hw.subject, userSubjects);
+  const style = subj.color ? `style="--s: ${subj.color}"` : '';
+  return `<article class="card ${subj.class} ${done ? 'done' : ''}" data-id="${esc(hw.id)}" ${style}>
     <span class="accent" aria-hidden="true"></span>
     <button type="button" class="check ${done ? 'checked' : ''}" data-act="toggle" role="checkbox" aria-checked="${done}"
       aria-label="${esc(hw.subject)}: als ${done ? 'offen' : 'erledigt'} markieren">${icon('check', 20)}</button>
     <div class="card-body" data-act="edit" role="button" tabindex="0" aria-label="Bearbeiten: ${esc(hw.subject)}">
       <div class="meta">
-        <span class="badge">${esc(hw.subject)}</span>
+        <span class="badge subj-${subjectKey(hw.subject)}">${esc(hw.subject)}</span>
         ${badge ? `<span class="pill ${badge.level}">${badge.label}</span>` : ''}
         ${done ? `<span class="pill done">Erledigt</span>` : ''}
       </div>
@@ -49,7 +52,7 @@ export function createHomeworkView(root, ctx) {
         items.push({ key: `h${g}`, html: `<h2 class="group-title">${GROUP_TITLES[g]}<span>${n}</span></h2>` });
         lastGroup = g;
       }
-      items.push({ key: hw.id, html: card(hw, state.today) });
+      items.push({ key: hw.id, html: card(hw, state.today, state.subjects) });
     }
     reconcile(list, items);
 
@@ -71,7 +74,7 @@ export function createHomeworkView(root, ctx) {
     const u = uid();
     const id = entry?.id || store.newId(u, 'homework');
     openEntryForm({
-      kind: 'homework', entry, today: ctx.state.today,
+      kind: 'homework', entry, today: ctx.state.today, userSubjects: ctx.state.subjects,
       onSave: async (data) => {
         const res = await wrap(store.settle(store.saveHomework(u, id, { ...data, completed: entry?.completed || false }, !entry), ctx.lateError));
         toast(res === 'saved' ? (entry ? 'Änderungen gespeichert' : 'Hausaufgabe gespeichert') : 'Offline gespeichert – wird synchronisiert', { type: 'success' });

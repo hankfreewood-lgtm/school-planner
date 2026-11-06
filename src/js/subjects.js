@@ -11,3 +11,37 @@ const KEYS = {
 };
 
 export const subjectKey = (s) => KEYS[s] || 'other';
+
+// Benutzerdefinierte Fächer werden in Firestore unter users/{uid}/subjects gespeichert.
+// Jedes Thema hat: name, color (Hex-String), id.
+export const subjectColor = (subject, userSubjects = []) => {
+  const key = subjectKey(subject);
+  const builtIn = { math: '#7fa6f0', german: '#f28c7a', english: '#e88aa6', bio: '#8fd98a', chem: '#5fd0c5', phys: '#f2ab63', hist: '#cfa583', geo: '#63c3d6', cs: '#7fb2e8', music: '#ff8fc0', art: '#e08fbf', sport: '#e6c94a', social: '#a6aab5', other: '#8e919b' };
+
+  // Prüfe ob built-in Fach (alle Keys inkl. 'other' für Sonstiges)
+  if (KEYS[subject]) {
+    return builtIn[key] || builtIn.other;
+  }
+
+  // Wenn nicht im Standard-Lookup, suche in userSubjects nach exaktem Match
+  for (const us of userSubjects) {
+    if (us.name.toLowerCase() === subject.toLowerCase()) return us.color || builtIn.other;
+  }
+
+  // Falls nichts gefunden → Benutzer-Fach (eigene Farbe)
+  return null; // null bedeutet: "custom subject" -> Karte wird --s inline setzen
+};
+
+// Liefert CSS-Klasse und Farbe für --s Variable basierend auf userSubjects
+export const getSubjectVars = (subject, userSubjects = []) => {
+  const key = subjectKey(subject);
+  const color = subjectColor(subject, userSubjects);
+
+  // Built-in Fächer (alle in KEYS definiert) nutzen CSS-Klasse
+  if (KEYS[subject] && color) {
+    return { class: `subj-${key}`, color };
+  }
+
+  // Benutzer-Fach: nutzt --s inline via .subj-custom + style="--s: #hex"
+  return { class: 'subj-custom', color };
+};

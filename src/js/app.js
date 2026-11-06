@@ -7,6 +7,7 @@ import { icon } from './icons.js';
 import { createHomeworkView } from './homework.js';
 import { createTestsView } from './tests.js';
 import { createProfileView } from './profile.js';
+import { SUBJECTS, subjectKey, getSubjectVars } from './subjects.js';
 
 const state = {
   user: null,
@@ -16,6 +17,7 @@ const state = {
   online: navigator.onLine,
   pendingHw: false, pendingTests: false,
   tab: 'homework',
+  subjects: [],
 };
 
 let deferredInstall = null;
@@ -145,6 +147,12 @@ function startData() {
       if (typeof remote.subjectTint === 'boolean' && remote.subjectTint !== getTint()) { setTint(remote.subjectTint); changed = true; }
       if (changed) views.profile.render();
     }),
+    store.watchSubjects(uid, (items) => {
+      state.subjects = items;
+      views.homework.render();
+      views.tests.render();
+      views.profile.render();
+    }, fail),
   );
 }
 

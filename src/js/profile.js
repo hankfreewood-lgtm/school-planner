@@ -3,6 +3,9 @@ import { icon, googleLogo } from './icons.js';
 import { getTheme, getTint, setTheme, setTint } from './theme.js';
 import { signInWithGoogle, logout } from './auth.js';
 import { SUBJECTS, subjectKey } from './subjects.js';
+import {
+  watchSubjects, saveSubject, deleteSubject, newSubjectId,
+} from './store.js';
 
 export const APP_VERSION = __APP_VERSION__;
 export const REPO_URL = 'https://github.com/hankfreewood-lgtm/school-planner';
@@ -14,10 +17,21 @@ const THEMES = [
 ];
 
 export function createProfileView(root, ctx) {
+  let subjectsUnsub = null;
+
   function render() {
     const { user } = ctx.state;
     root.querySelector('.profile-content').innerHTML = user ? signedIn(user) : signedOut();
-    if (user) wireSettings();
+    if (user) {
+      wireSettings();
+      renderSubjects(user.uid);
+      watchSubjects(user.uid, (subs) => {
+        renderSubjects(user.uid);
+      });
+    } else if (subjectsUnsub) {
+      subjectsUnsub();
+      subjectsUnsub = null;
+    }
   }
 
   function signedOut() {
@@ -45,7 +59,7 @@ export function createProfileView(root, ctx) {
         <div class="who"><h2>${esc(user.displayName || 'Angemeldet')}</h2><p>${esc(user.email || '')}</p></div>
         <button class="btn tonal" data-act="logout" type="button">${icon('logout', 20)}Abmelden</button>
       </section>
-      ${settingsCard()}${infoCard()}`;
+      ${settingsCard()}${infoCard()}${subjectsSection()}`;
   }
 
   function settingsCard() {
@@ -66,18 +80,71 @@ export function createProfileView(root, ctx) {
     </section>`;
   }
 
-  function infoCard() {
-    const install = ctx.canInstall()
-      ? `<button class="btn tonal" data-act="install" type="button">${icon('download', 20)}App installieren</button>` : '';
-    return `<section class="card info">
-      <h3>${icon('info', 22)}App-Informationen</h3>
-      <dl>
-        <div><dt>App</dt><dd>Schulplaner</dd></div>
-        <div><dt>Version</dt><dd>${esc(APP_VERSION)}</dd></div>
-        <div><dt>Quellcode</dt><dd><a href="${REPO_URL}" target="_blank" rel="noopener">GitHub</a></dd></div>
-      </dl>
-      ${install}
+  function subjectsSection() {
+    return `<section class="card subjects-mgr">
+      <h3>${icon('bookmark', 22)}Fächer</h3>
+      <p style="color: var(--text-muted); font-size: .84rem; margin-bottom: 8px;">Eigene Fächer hinzufügen oder bearbeiten. Die Farbe bestimmt die Akzentfarbe der Karten.</p>
+      <div class="subject-list" id="subject-list"></div>
+      <button class="btn tonal" data-act="add-subject" type="button">${icon('add', 20)}Fach hinzufügen</button>
     </section>`;
+  }
+
+  function renderSubjects(uid) {
+    const host = root.querySelector('#subject-list');
+    if (!host) return;
+    host.innerHTML = '';
+  }
+
+  function addSubjectDialog(uid) {
+    return new Promise((resolve) => {
+      const dlg = $('#confirm');
+      dlg.innerHTML = `
+        <h2 class="dialog-title">Fach hinzufügen</h2>
+        <div class="field" style="margin-bottom: 12px;">
+          <label style="font-size: .77rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px;">Fachname</label>
+          <input type="text" id="new-subject-name" style="width: 100%; min-height: 45px; padding: 10px 14px; border-radius: var(--radius-s); border: 1px solid var(--outline-strong); background: var(--surface-3); color: var(--text); font: inherit;" required>
+        </div>
+        <div class="field" style="margin-bottom: 12px;">
+          <label style="font-size: .77rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px;">Farbe</label>
+          <input type="color" id="new-subject-color" value="#2fae5c" style="width: 100%; height: 48px; border: none; border-radius: var(--radius-s); cursor: pointer;">
+        </div>
+        <div class="dialog-actions">
+          <button class="btn text" data-act="cancel" type="button">Abbrechen</button>
+          <button class="btn filled" data-act="ok" type="button">Hinzufügen</button>
+        </div>`;
+      let result = null;
+      const onClick = (e) => {
+        const act = e.target.closest('[data-act]')?.dataset.act;
+        if (!act) return;
+        const nameEl = dlg.querySelector('#new-subject-name');
+        const colorEl = dlg.querySelector('#new-subject-color');
+        if (act === 'ok') {
+          result = { name: nameEl.value.trim(), color: colorEl.value };
+        }
+        closeDialog(dlg);
+      };
+      const onClose = () => {
+        dlg.removeEventListener('click', onClick);
+        dlg.removeEventListener('close', onClose);
+        resolve(result);
+      };
+      dlg.addEventListener('click', onClick);
+      dlg.addEventListener('close', onClose);
+      openDialog(dlg);
+      const nameInput = dlg.querySelector('#new-subject-name');
+      nameInput.focus();
+    });
+  }
+
+  function openDialog(dlg) {
+    dlg.classList.remove('closing');
+    if (!dlg.open) dlg.showModal();
+  }
+
+  function closeDialog(dlg) {
+    if (!dlg.open || dlg.classList.contains('closing')) return;
+    dlg.classList.add('closing');
+    dlg.close();
   }
 
   function wireSettings() { /* Events laufen per Delegation */ }
@@ -99,6 +166,28 @@ export function createProfileView(root, ctx) {
         t.disabled = false;
         const sp = t.querySelector('.spinner'); if (sp) sp.hidden = true;
       }
+    }
+    if (t.dataset.act === 'add-subject') {
+      const uid = ctx.state.user?.uid;
+      if (!uid) return;
+      const res = await addSubjectDialog(uid);
+      if (!res) return;
+      const id = newSubjectId(uid);
+      try {
+        await saveSubject(uid, id, { name: res.name, color: res.color });
+        toast(`Fach "${esc(res.name)}" hinzugefügt`);
+      } catch (err) { toast(errorMessage(err), { type: 'error' }); }
+    }
+    if (t.dataset.act === 'delete-subject') {
+      const uid = ctx.state.user?.uid;
+      const sid = t.dataset.subjectId;
+      if (!uid || !sid) return;
+      const yes = await confirmDialog({ title: 'Fach löschen?', message: 'Dieses Fach wird für alle Einträge entfernt.' });
+      if (!yes) return;
+      try {
+        await deleteSubject(uid, sid);
+        toast('Fach entfernt');
+      } catch (err) { toast(errorMessage(err), { type: 'error' }); }
     }
   });
   root.addEventListener('change', (e) => {
