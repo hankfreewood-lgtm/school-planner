@@ -3,6 +3,7 @@
 Moderner Schulplaner als Progressive Web App: Hausaufgaben und anstehende Tests/Klassenarbeiten verwalten, mit Google-Anmeldung, Cloud-Sync, Offline-Unterstützung sowie Light-/Dark-Mode.
 
 **Live:** https://school-planner-hf26.web.app
+**Repository:** https://github.com/hankfreewood-lgtm/school-planner
 
 ---
 
@@ -201,11 +202,18 @@ firebase deploy --only hosting
 
 ---
 
-## Manuelle Schritte (einmalig)
+## Einrichtung – bereits erledigt
 
-1. **Google-Anmeldung in Firebase aktivieren:** Firebase Console → Authentication → „Erste Schritte“ → Sign-in method → Google → Aktivieren.
-2. **GitHub-Repository anlegen** (oder vorhandenes verbinden) und Secret `FIREBASE_SERVICE_ACCOUNT_SCHOOL_PLANNER_HF26` setzen.
-3. Optional: Eigene Domain unter Firebase Hosting verbinden.
+- Firebase-Projekt `school-planner-hf26` mit Firestore, Hosting und Web-App.
+- Firestore Security Rules deployt (`firebase deploy --only firestore`).
+- **Google-Anmeldung aktiviert** über `firebase deploy --only auth` (Konfiguration in `firebase.json` unter `auth.providers.googleSignIn`). Kein manueller Console-Schritt nötig.
+- GitHub-Repository erstellt; Service Account `github-actions@school-planner-hf26.iam.gserviceaccount.com` mit den Rollen *Firebase Hosting Admin*, *Firebase Viewer*, *Firebase Rules Admin*, *Service Usage Consumer*; Secret `FIREBASE_SERVICE_ACCOUNT_SCHOOL_PLANNER_HF26` gesetzt.
+- Erster Deploy über GitHub Actions erfolgreich.
+
+## Noch manuell möglich (optional)
+
+1. Eigene Domain unter Firebase Hosting verbinden.
+2. Bei eigener Domain: Firebase Console → Authentication → Settings → autorisierte Domains ergänzen.
 
 ---
 
