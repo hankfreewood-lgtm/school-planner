@@ -1,0 +1,92 @@
+/* Design-Tokens, Material-3-inspiriert. Light/Dark über html[data-theme]. */
+:root {
+  --radius-s: 12px;
+  --radius-m: 18px;
+  --radius-l: 24px;
+  --radius-xl: 28px;
+  --nav-h: 76px;
+  --ease: cubic-bezier(.2, 0, 0, 1);
+  --ease-emph: cubic-bezier(.05, .7, .1, 1);
+  --font: 'Roboto Flex', Roboto, 'Google Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+}
+
+html[data-theme='light'] {
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --surface-2: #eef0f7;
+  --surface-3: #e4e7f1;
+  --outline: #c6c9d6;
+  --text: #1a1b21;
+  --text-muted: #565968;
+  --primary: #3c55a8;
+  --on-primary: #ffffff;
+  --primary-container: #dce2ff;
+  --on-primary-container: #0a1c52;
+  --danger: #b3261e;
+  --danger-container: #fbe3e1;
+  --success: #1f7a3d;
+  --success-container: #dcf2e2;
+  --warn: #8a4b00;
+  --warn-container: #ffecd0;
+  --shadow-1: 0 1px 2px rgb(20 24 50 / .08), 0 1px 3px rgb(20 24 50 / .06);
+  --shadow-2: 0 4px 14px rgb(20 24 50 / .10), 0 1px 3px rgb(20 24 50 / .08);
+  --shadow-3: 0 10px 30px rgb(20 24 50 / .18);
+  --scrim: rgb(15 18 35 / .42);
+  --ink-mix: #000;
+  --ink-pct: 72%;
+  --tint-pct: 10%;
+
+  --s-math: #3b6fd4; --s-german: #cf4a4a; --s-english: #8a55c9; --s-bio: #3d9150;
+  --s-chem: #1fa39a; --s-phys: #e07b27; --s-hist: #8d6445; --s-geo: #1b8a9c;
+  --s-cs: #5057c4; --s-music: #d9528b; --s-art: #b8409e; --s-sport: #c9a014;
+  --s-social: #72767f; --s-other: #8a8d96;
+}
+
+html[data-theme='dark'] {
+  --bg: #121316;
+  --surface: #1c1d22;
+  --surface-2: #25262c;
+  --surface-3: #30313a;
+  --outline: #454753;
+  --text: #e6e4ec;
+  --text-muted: #adb0be;
+  --primary: #b4c4ff;
+  --on-primary: #112561;
+  --primary-container: #28397a;
+  --on-primary-container: #dce2ff;
+  --danger: #ffb4ab;
+  --danger-container: #55201d;
+  --success: #8fdba3;
+  --success-container: #1b3d27;
+  --warn: #ffc78a;
+  --warn-container: #4a2f0c;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / .4);
+  --shadow-2: 0 4px 14px rgb(0 0 0 / .45);
+  --shadow-3: 0 10px 30px rgb(0 0 0 / .6);
+  --scrim: rgb(0 0 0 / .6);
+  --ink-mix: #fff;
+  --ink-pct: 82%;
+  --tint-pct: 11%;
+
+  --s-math: #8fb0ff; --s-german: #ff9a9a; --s-english: #c9a4ff; --s-bio: #8ad69a;
+  --s-chem: #6fe0d6; --s-phys: #ffb36e; --s-hist: #d2a785; --s-geo: #6fd0e0;
+  --s-cs: #a1a8ff; --s-music: #ff9cc6; --s-art: #f09ae0; --s-sport: #ecd05a;
+  --s-social: #b4b8c2; --s-other: #a0a3ad;
+}
+
+.subj-math { --s: var(--s-math); }
+.subj-german { --s: var(--s-german); }
+.subj-english { --s: var(--s-english); }
+.subj-bio { --s: var(--s-bio); }
+.subj-chem { --s: var(--s-chem); }
+.subj-phys { --s: var(--s-phys); }
+.subj-hist { --s: var(--s-hist); }
+.subj-geo { --s: var(--s-geo); }
+.subj-cs { --s: var(--s-cs); }
+.subj-music { --s: var(--s-music); }
+.subj-art { --s: var(--s-art); }
+.subj-sport { --s: var(--s-sport); }
+.subj-social { --s: var(--s-social); }
+.subj-other { --s: var(--s-other); }
