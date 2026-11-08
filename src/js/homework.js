@@ -14,17 +14,19 @@ function card(hw, today, userSubjects) {
   const subj = getSubjectVars(hw.subject, userSubjects);
   const style = subj.color ? `style="--s: ${subj.color}"` : '';
   return `<article class="card ${subj.class} ${done ? 'done' : ''}" data-id="${esc(hw.id)}" ${style}>
-    <span class="accent" aria-hidden="true"></span>
     <button type="button" class="check ${done ? 'checked' : ''}" data-act="toggle" role="checkbox" aria-checked="${done}"
       aria-label="${esc(hw.subject)}: als ${done ? 'offen' : 'erledigt'} markieren">${icon('check', 20)}</button>
     <div class="card-body" data-act="edit" role="button" tabindex="0" aria-label="Bearbeiten: ${esc(hw.subject)}">
-      <div class="meta">
-        <span class="badge subj-${subjectKey(hw.subject)}">${esc(hw.subject)}</span>
-        ${badge ? `<span class="pill ${badge.level}">${badge.label}</span>` : ''}
-        ${done ? `<span class="pill done">Erledigt</span>` : ''}
+      <div class="card-main">
+        <div class="meta">
+          <span class="badge subj-${subjectKey(hw.subject)}">${esc(hw.subject)}</span>
+          ${badge ? `<span class="pill ${badge.level}">${badge.label}</span>` : ''}
+          ${done ? `<span class="pill done">Erledigt</span>` : ''}
+        </div>
+        <p class="text">${esc(hw.content)}</p>
+        <p class="date">${icon('event', 16)}<span>${weekdayShort(hw.dueDate)}, ${formatDE(hw.dueDate)}</span></p>
       </div>
-      <p class="text">${esc(hw.content)}</p>
-      <p class="date">${icon('event', 16)}<span>${weekdayShort(hw.dueDate)}, ${formatDE(hw.dueDate)}</span></p>
+      <span class="chev" aria-hidden="true">${icon('chevronRight', 22)}</span>
     </div>
   </article>`;
 }

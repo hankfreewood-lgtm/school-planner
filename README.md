@@ -7,6 +7,25 @@ Moderner Schulplaner als Progressive Web App: Hausaufgaben und anstehende Tests/
 
 ---
 
+## Ohne Server öffnen (eigenständige Version)
+
+Die Datei `index.html` im Projektstamm ist eine **vollständig eigenständige** Version:
+CSS und JavaScript sind direkt eingebettet. Einfach per Doppelklick öffnen – kein
+Server, kein Build, keine Installation nötig.
+
+- Erkannt am `file://`-Protokoll startet die App im **lokalen Modus**: Daten werden
+  in `localStorage` gespeichert, es ist keine Google-Anmeldung erforderlich.
+- Beim ersten Start sind Beispielinhalte angelegt, damit alle Ansichten gefüllt sind.
+- Im Profil lässt sich der lokale Modus „abmelden“ und wieder starten.
+
+Neu erzeugen (nach Änderungen am Quellcode):
+
+```bash
+npm run standalone   # baut dist/ und schreibt die eigenständige index.html
+```
+
+---
+
 ## Funktionen
 
 | Bereich | Funktion |
@@ -46,7 +65,10 @@ Mathematik blau · Deutsch rot · Englisch violett · Biologie grün · Chemie t
 
 ```
 school-planner/
-├── index.html                  App-Shell (Theme-Script inline gegen Flash)
+├── index.html                  eigenständige App (generiert, per Doppelklick öffnen)
+├── app/
+│   └── index.html              Vite-Eingabe (App-Shell für Dev/Deploy)
+├── scripts/build-standalone.mjs  bettet CSS/JS für index.html ein
 ├── public/
 │   ├── manifest.webmanifest
 │   ├── sw.js                   Service Worker
@@ -55,15 +77,15 @@ school-planner/
 │   └── icons/                  generierte PNG/SVG-Icons
 ├── src/
 │   ├── css/
-│   │   ├── fonts.css           @font-face (DM Sans, lokal)
+│   │   ├── fonts.css           ungenutzt (Systemschrift ist Standard)
 │   │   ├── style.css           Tokens-Import, Layout, Navigation
 │   │   ├── themes.css          Light-/Dark-Tokens, Fachfarben
 │   │   └── components.css      Karten, Sheets, Buttons, Profil …
 │   └── js/
 │       ├── app.js              Bootstrap, State, Navigation, Auth-Flow, Tageswechsel
-│       ├── firebase.js         Firebase-Init (Persistenz, Offline-Cache, Emulator-Switch)
-│       ├── auth.js             Google-Login/-Logout, Profildokument
-│       ├── store.js            Firestore-Zugriff (watch/CRUD/Preferences)
+│       ├── firebase.js         Firebase-Init + Erkennung des lokalen Modus (file://)
+│       ├── auth.js             Google-Login/-Logout bzw. lokaler Modus
+│       ├── store.js            Firestore-Zugriff bzw. localStorage im lokalen Modus
 │       ├── dates.js            reine Datums-/Sortier-/Countdown-Logik (getestet)
 │       ├── homework.js         Hausaufgaben-View
 │       ├── tests.js            Tests-View
@@ -92,7 +114,7 @@ Voraussetzungen: Node.js ≥ 20, npm.
 
 ```bash
 npm install
-npm run dev          # http://localhost:5173
+npm run dev          # http://localhost:5173/app/
 ```
 
 Weitere Skripte:
@@ -101,6 +123,7 @@ Weitere Skripte:
 npm test             # Datums-/Sortier-/Countdown-Logik
 npm run test:rules   # Security Rules gegen den Firestore-Emulator (benötigt Java 21+)
 npm run build        # Produktions-Build nach dist/
+npm run standalone   # baut zusätzlich die eigenständige index.html neu
 npm run preview      # Build lokal testen
 npm run icons        # PWA-Icons neu erzeugen
 ```
@@ -110,7 +133,7 @@ npm run icons        # PWA-Icons neu erzeugen
 ```bash
 firebase emulators:start --only auth,firestore --project demo-school-planner
 # App mit Emulator-Verbindung öffnen:
-# http://localhost:5173/?emulator
+# http://localhost:5173/app/?emulator
 ```
 
 Der Emulator-Schalter ist nur im Dev-Build aktiv (`import.meta.env.DEV`) und wird aus dem Produktions-Bundle entfernt.

@@ -11,16 +11,17 @@ function card(t, today, userSubjects) {
   const subj = getSubjectVars(t.subject, userSubjects);
   const style = subj.color ? `style="--s: ${subj.color}"` : '';
   return `<article class="card test ${subj.class}" data-id="${esc(t.id)}" ${style}>
-    <span class="accent" aria-hidden="true"></span>
-    <span class="subj-icon" aria-hidden="true">${icon('tests', 20)}</span>
     <div class="card-body" data-act="edit" role="button" tabindex="0" aria-label="Bearbeiten: ${esc(t.subject)}-Test">
-      <div class="meta">
-        <span class="badge subj-${subjectKey(t.subject)}">${esc(t.subject)}</span>
+      <div class="card-main">
+        <div class="meta">
+          <span class="badge subj-${subjectKey(t.subject)}">${esc(t.subject)}</span>
+        </div>
+        <p class="text">${esc(t.topic)}</p>
+        <p class="date">${icon('event', 16)}<span>${weekdayLong(t.testDate)}, ${formatDE(t.testDate)}</span></p>
       </div>
-      <p class="text">${esc(t.topic)}</p>
-      <p class="date">${icon('event', 16)}<span>${weekdayLong(t.testDate)}, ${formatDE(t.testDate)}</span></p>
+      <span class="countdown ${cd.level}" aria-label="${esc(cd.label)}">${esc(cd.label)}</span>
+      <span class="chev" aria-hidden="true">${icon('chevronRight', 22)}</span>
     </div>
-    <span class="countdown ${cd.level}" aria-label="${esc(cd.label)}">${esc(cd.label)}</span>
   </article>`;
 }
 

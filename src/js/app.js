@@ -78,9 +78,37 @@ function syncScrollEdge() {
 window.addEventListener('scroll', syncScrollEdge, { passive: true });
 syncScrollEdge();
 
+/* ---------------- Overflow-Menü (⋯) ---------------- */
+const menu = $('#menu');
+const moreBtn = $('#more');
+function closeMenu() {
+  if (!menu || menu.hidden) return;
+  menu.hidden = true;
+  moreBtn?.setAttribute('aria-expanded', 'false');
+}
+function openMenu() {
+  if (!menu) return;
+  menu.hidden = false;
+  moreBtn?.setAttribute('aria-expanded', 'true');
+}
+moreBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  menu?.hidden ? openMenu() : closeMenu();
+});
+document.addEventListener('click', (e) => {
+  if (menu && !menu.hidden && !e.target.closest('#menu, #more')) closeMenu();
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+menu?.addEventListener('click', (e) => {
+  const themeBtn = e.target.closest('[data-menu-theme]');
+  if (themeBtn) { setTheme(themeBtn.dataset.menuTheme); ctx.prefsChanged(); closeMenu(); return; }
+  if (e.target.closest('[data-go]')) closeMenu();
+});
+
 /* ---------------- Navigation ---------------- */
 function showTab(tab, { push = true } = {}) {
   if (!TABS[tab]) tab = 'homework';
+  closeMenu();
   state.tab = tab;
   for (const name of Object.keys(TABS)) {
     $(`#view-${name}`).hidden = name !== tab;
@@ -220,7 +248,7 @@ window.addEventListener('appinstalled', () => {
   deferredInstall = null; views.profile.render();
   toast('App installiert', { type: 'success' });
 });
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+if ('serviceWorker' in navigator && import.meta.env.PROD && location.protocol.startsWith('http')) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch((e) => console.warn('SW:', e)));
 }
 

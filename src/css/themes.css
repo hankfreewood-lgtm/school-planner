@@ -10,7 +10,7 @@
   --radius-xl: 26px;
   --radius-2xl: 34px;
 
-  --nav-h: 62px;
+  --nav-h: 76px;
   --sidebar-w: 232px;
 
   /* Bewegung – ruhig, aber direkt. Inhalte nutzen Springs (siehe ui.js). */
@@ -64,11 +64,11 @@ html[data-theme='dark'] {
   --text-muted: #98989d;
   --text-faint: #636366;
 
-  --primary: #4ed17c;
-  --primary-hover: #63dd8d;
-  --on-primary: #04150b;
-  --primary-container: rgba(78, 209, 124, .16);
-  --on-primary-container: #7ee9a6;
+  --primary: #0a84ff;
+  --primary-hover: #3b9bff;
+  --on-primary: #ffffff;
+  --primary-container: rgba(10, 132, 255, .18);
+  --on-primary-container: #64b5ff;
 
   --danger: #ff6961;
   --danger-container: rgba(255, 105, 97, .16);
@@ -114,11 +114,11 @@ html[data-theme='light'] {
   --text-muted: #6e6e73;
   --text-faint: #a1a1a6;
 
-  --primary: #2aa85a;
-  --primary-hover: #239a50;
+  --primary: #007aff;
+  --primary-hover: #0a6fe0;
   --on-primary: #ffffff;
-  --primary-container: rgba(42, 168, 90, .12);
-  --on-primary-container: #1a6b39;
+  --primary-container: rgba(0, 122, 255, .1);
+  --on-primary-container: #0a5fbf;
 
   --danger: #e5484d;
   --danger-container: rgba(229, 72, 77, .1);

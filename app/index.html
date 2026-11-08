@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Schulplaner</title>
+  <meta name="description" content="Schulplaner: Hausaufgaben und Tests übersichtlich verwalten.">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark light">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Schulplaner">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <!-- Theme VOR dem ersten Rendern setzen, damit nichts aufblitzt -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('sp-theme');
+        var dark = t === 'system' ? matchMedia('(prefers-color-scheme: dark)').matches : t !== 'light';
+        var r = document.documentElement;
+        r.dataset.theme = dark ? 'dark' : 'light';
+        r.style.colorScheme = dark ? 'dark' : 'light';
+        r.dataset.tint = localStorage.getItem('sp-tint') === '1' ? 'on' : 'off';
+        document.querySelector('meta[name="theme-color"]').content = dark ? '#000000' : '#f2f2f7';
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="/src/css/style.css">
+</head>
+<body>
+  <div id="splash" aria-label="Lade …"><div class="splash-logo"></div></div>
+
+  <div class="app">
+    <nav class="nav" aria-label="Hauptnavigation">
+      <div class="nav-brand" aria-hidden="true"><span data-icon="tests"></span></div>
+      <button class="nav-item" data-tab="homework"><span class="nav-pill" data-icon="homework"></span><span class="nav-label">Hausaufgaben</span></button>
+      <button class="nav-item" data-tab="tests"><span class="nav-pill" data-icon="tests"></span><span class="nav-label">Tests</span></button>
+      <button class="nav-item" data-tab="profile"><span class="nav-pill" data-icon="person"></span><span class="nav-label">Profil</span></button>
+    </nav>
+
+    <div class="main">
+      <header class="appbar">
+        <div class="appbar-titles">
+          <p class="appbar-date" id="appbar-date"></p>
+          <h1 id="title">Hausaufgaben</h1>
+        </div>
+        <div class="appbar-actions">
+          <div id="status" class="status" role="status" hidden></div>
+          <button id="more" class="appbar-more" type="button" aria-label="Weitere Optionen" aria-haspopup="menu" aria-expanded="false"><span data-icon="more"></span></button>
+        </div>
+      </header>
+
+      <div id="menu" class="menu" role="menu" hidden>
+        <p class="menu-label">Darstellung</p>
+        <button class="menu-item" role="menuitem" data-menu-theme="light"><span data-icon="light"></span>Hell</button>
+        <button class="menu-item" role="menuitem" data-menu-theme="dark"><span data-icon="dark"></span>Dunkel</button>
+        <button class="menu-item" role="menuitem" data-menu-theme="system"><span data-icon="system"></span>System</button>
+        <div class="menu-sep" role="separator"></div>
+        <button class="menu-item" role="menuitem" data-go="profile"><span data-icon="person"></span>Profil öffnen</button>
+      </div>
+
+      <main id="content">
+        <section id="view-homework" class="view" hidden>
+          <div class="banner-host"></div><div class="list"></div><div class="empty-host"></div>
+        </section>
+        <section id="view-tests" class="view" hidden>
+          <div class="list"></div><div class="empty-host"></div>
+        </section>
+        <section id="view-profile" class="view" hidden>
+          <div class="profile-content"></div>
+        </section>
+      </main>
+    </div>
+
+    <button id="fab" class="fab" hidden><span data-icon="add"></span><span class="fab-label"></span></button>
+  </div>
+
+  <dialog id="sheet" class="sheet" aria-modal="true"></dialog>
+  <dialog id="confirm" class="dialog" aria-modal="true"></dialog>
+  <div id="toast" class="toast" popover="manual" role="status" aria-live="polite"></div>
+
+  <noscript><p style="padding:2rem">Diese App benötigt JavaScript.</p></noscript>
+  <script type="module" src="/src/js/app.js"></script>
+</body>
+</html>

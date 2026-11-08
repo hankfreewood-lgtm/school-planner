@@ -4,11 +4,18 @@ const TINT_KEY = 'sp-tint';
 const media = matchMedia('(prefers-color-scheme: dark)');
 const listeners = new Set();
 
+const read = (k) => {
+  try { return localStorage.getItem(k); } catch { return null; }
+};
+const write = (k, v) => {
+  try { localStorage.setItem(k, v); } catch { /* Ignorieren (privater Modus) */ }
+};
+
 export const getTheme = () => {
-  const t = localStorage.getItem(KEY);
+  const t = read(KEY);
   return t === 'light' || t === 'dark' || t === 'system' ? t : 'dark';
 };
-export const getTint = () => localStorage.getItem(TINT_KEY) !== '0';
+export const getTint = () => read(TINT_KEY) === '1';
 
 function resolved(theme) {
   return theme === 'system' ? (media.matches ? 'dark' : 'light') : theme;
@@ -25,13 +32,13 @@ export function applyTheme(theme = getTheme()) {
 }
 
 export function setTheme(theme) {
-  localStorage.setItem(KEY, theme);
+  write(KEY, theme);
   applyTheme(theme);
   listeners.forEach((fn) => fn());
 }
 
 export function setTint(on) {
-  localStorage.setItem(TINT_KEY, on ? '1' : '0');
+  write(TINT_KEY, on ? '1' : '0');
   applyTheme();
   listeners.forEach((fn) => fn());
 }

@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "standalone": "vite build && node scripts/build-standalone.mjs",
     "preview": "vite preview",
     "icons": "node scripts/generate-icons.mjs",
     "test": "node --test tests/dates.test.js",
@@ -18,5 +19,20 @@
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.0",
     "vite": "^6.0.0"
-  }
+  },
+  "main": "vite.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hankfreewood-lgtm/school-planner.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hankfreewood-lgtm/school-planner/issues"
+  },
+  "homepage": "https://github.com/hankfreewood-lgtm/school-planner#readme"
 }

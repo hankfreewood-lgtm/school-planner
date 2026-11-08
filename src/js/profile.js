@@ -84,6 +84,20 @@ export function createProfileView(root, ctx) {
     </section>`;
   }
 
+  function infoCard() {
+    const install = ctx.canInstall()
+      ? `<button class="btn tonal" data-act="install" type="button">${icon('download', 20)}App installieren</button>` : '';
+    return `<section class="card info">
+      <h3>${icon('info', 22)}App-Informationen</h3>
+      <dl>
+        <div><dt>App</dt><dd>Schulplaner</dd></div>
+        <div><dt>Version</dt><dd>${esc(APP_VERSION)}</dd></div>
+        <div><dt>Quellcode</dt><dd><a href="${REPO_URL}" target="_blank" rel="noopener">GitHub</a></dd></div>
+      </dl>
+      ${install}
+    </section>`;
+  }
+
   function subjectsSection() {
     return `<section class="card subjects-mgr">
       <h3>${icon('bookmark', 22)}Fächer</h3>
