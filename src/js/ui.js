@@ -48,11 +48,108 @@ export function closeDialog(dlg) {
 /** Öffnet das Sheet mit beliebigem HTML-Inhalt und gibt das Dialog-Element zurück. */
 export function openSheet(html) {
   const dlg = $('#sheet');
+  dlg.style.setProperty('--sheet-drag', '0px');
+  dlg.classList.remove('dragging', 'closing');
   dlg.innerHTML = `<div class="sheet-grab" aria-hidden="true"></div>${html}`;
   openDialog(dlg);
   return dlg;
 }
 export const closeSheet = () => closeDialog($('#sheet'));
+
+/* ---------------- Fluides Sheet: 1:1-Drag, Rubber-Band, Momentum, Velocity-Handoff ---------------- */
+const prefersReduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** Apples Momentum-Projektion: wohin der Finger „geworfen" hätte. */
+function project(velocity, deceleration = 0.998) {
+  return (velocity / 1000) * deceleration / (1 - deceleration);
+}
+
+/** Progressive Resistenz an der oberen Kante – kein harter Stopp. */
+function rubberband(overshoot, dimension, constant = 0.55) {
+  return (overshoot * dimension * constant) / (dimension + constant * Math.abs(overshoot));
+}
+
+/** Kritisch gedämpfter Spring mit übernommener Release-Geschwindigkeit. */
+function animateSpring(dlg, from, to, velocity, done) {
+  dlg._cancelSpring?.();
+  let cancelled = false;
+  dlg._cancelSpring = () => { cancelled = true; };
+  if (prefersReduced()) {
+    dlg.style.setProperty('--sheet-drag', `${Math.max(0, to)}px`);
+    done();
+    return;
+  }
+  const stiffness = (2 * Math.PI / 0.34) ** 2;
+  const damping = 2 * Math.sqrt(stiffness);
+  let pos = from;
+  let vel = velocity;
+  let last = performance.now();
+  const step = (now) => {
+    if (cancelled) return;
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    vel += (-stiffness * (pos - to) - damping * vel) * dt;
+    pos += vel * dt;
+    dlg.style.setProperty('--sheet-drag', `${Math.max(0, pos)}px`);
+    if (Math.abs(vel) < 6 && Math.abs(pos - to) < 0.5) {
+      dlg.style.setProperty('--sheet-drag', `${Math.max(0, to)}px`);
+      dlg._cancelSpring = null;
+      done();
+      return;
+    }
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function initSheetDrag(dlg) {
+  let drag = null;
+
+  dlg.addEventListener('pointerdown', (e) => {
+    if (e.button) return;
+    if (!matchMedia('(max-width: 639px)').matches) return;
+    if (dlg.classList.contains('closing')) return;
+    if (!e.target.closest('.sheet-grab, .sheet-head')) return;
+    if (e.target.closest('button, a, input, select, textarea')) return;
+    dlg._cancelSpring?.();
+    drag = {
+      startY: e.clientY, lastY: e.clientY, lastT: performance.now(),
+      offset: 0, velocity: 0, height: dlg.getBoundingClientRect().height,
+    };
+    dlg.classList.add('dragging');
+    try { dlg.setPointerCapture(e.pointerId); } catch { /* optional */ }
+    e.preventDefault();
+  });
+
+  dlg.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const now = performance.now();
+    let dy = e.clientY - drag.startY;
+    if (dy < 0) dy = rubberband(dy, drag.height);
+    dy = Math.min(dy, drag.height);
+    drag.offset = dy;
+    drag.velocity = (e.clientY - drag.lastY) / Math.max((now - drag.lastT) / 1000, 0.001);
+    drag.lastY = e.clientY;
+    drag.lastT = now;
+    dlg.style.setProperty('--sheet-drag', `${dy}px`);
+  });
+
+  const end = (e) => {
+    if (!drag) return;
+    const { offset, height, velocity } = drag;
+    drag = null;
+    dlg.classList.remove('dragging');
+    try { dlg.releasePointerCapture(e.pointerId); } catch { /* optional */ }
+    const projected = offset + project(velocity);
+    if (projected > height * 0.4 || velocity > 900) {
+      animateSpring(dlg, offset, height, velocity, () => closeDialog(dlg));
+    } else {
+      animateSpring(dlg, offset, 0, velocity, () => dlg.style.setProperty('--sheet-drag', '0px'));
+    }
+  };
+  dlg.addEventListener('pointerup', end);
+  dlg.addEventListener('pointercancel', end);
+}
 
 /** Bestätigungsdialog; resolved mit true/false */
 export function confirmDialog({ title, message, confirmLabel = 'Löschen', danger = true }) {
@@ -89,7 +186,13 @@ export function initDialogs() {
   for (const dlg of $$('dialog')) {
     dlg.addEventListener('click', (e) => { if (e.target === dlg) closeDialog(dlg); });
     dlg.addEventListener('cancel', (e) => { e.preventDefault(); closeDialog(dlg); });
+    dlg.addEventListener('close', () => {
+      dlg.style.setProperty('--sheet-drag', '0px');
+      dlg.classList.remove('dragging');
+    });
   }
+  const sheet = $('#sheet');
+  if (sheet) initSheetDrag(sheet);
 }
 
 /* ---------------- Keyed Listen-Rendering ---------------- */

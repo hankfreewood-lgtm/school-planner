@@ -20,7 +20,7 @@ export function applyTheme(theme = getTheme()) {
   root.dataset.theme = r;
   root.style.colorScheme = r;
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.content = r === 'dark' ? '#0b100b' : '#efeee8';
+  if (meta) meta.content = r === 'dark' ? '#000000' : '#f2f2f7';
   root.dataset.tint = getTint() ? 'on' : 'off';
 }
 

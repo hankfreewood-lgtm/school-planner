@@ -70,6 +70,14 @@ function renderToday() {
 }
 renderToday();
 
+/* ---------------- Scroll-Edge: weicher Übergang statt harter Linie ---------------- */
+const appbar = $('.appbar');
+function syncScrollEdge() {
+  appbar?.classList.toggle('scrolled', window.scrollY > 6);
+}
+window.addEventListener('scroll', syncScrollEdge, { passive: true });
+syncScrollEdge();
+
 /* ---------------- Navigation ---------------- */
 function showTab(tab, { push = true } = {}) {
   if (!TABS[tab]) tab = 'homework';

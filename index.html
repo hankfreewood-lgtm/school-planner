@@ -5,12 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Schulplaner</title>
   <meta name="description" content="Schulplaner: Hausaufgaben und Tests übersichtlich verwalten.">
-  <meta name="theme-color" content="#0b100b">
+  <meta name="theme-color" content="#000000">
   <meta name="color-scheme" content="dark light">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Schulplaner">
-  <link rel="preload" href="/fonts/dm-sans-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
@@ -25,7 +24,7 @@
         r.dataset.theme = dark ? 'dark' : 'light';
         r.style.colorScheme = dark ? 'dark' : 'light';
         r.dataset.tint = localStorage.getItem('sp-tint') === '0' ? 'off' : 'on';
-        document.querySelector('meta[name="theme-color"]').content = dark ? '#0b100b' : '#efeee8';
+        document.querySelector('meta[name="theme-color"]').content = dark ? '#000000' : '#f2f2f7';
       } catch (e) {}
     })();
   </script>
