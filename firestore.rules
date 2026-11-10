@@ -11,12 +11,17 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == userId;
     }
 
+    // Fächer dürfen frei gewählt werden (eigene Fächer im Profil).
     function validSubject(s) {
-      return s is string && s in [
-        'Mathematik', 'Deutsch', 'Englisch', 'Biologie', 'Chemie', 'Physik',
-        'Geschichte', 'Geografie', 'Informatik', 'Musik', 'Kunst', 'Sport',
-        'Sozialkunde', 'Sonstiges'
-      ];
+      return s is string && s.size() > 0 && s.size() <= 60;
+    }
+
+    function validSubjectDoc(d) {
+      return d.keys().hasOnly(['name', 'color', 'createdAt', 'updatedAt'])
+        && d.keys().hasAll(['name', 'color'])
+        && validSubject(d.name)
+        && d.color is string
+        && d.color.matches('^#[0-9a-fA-F]{6}$');
     }
 
     // Datum als ISO-String "JJJJ-MM-TT" (kalendarisch, ohne Zeitzone)
@@ -72,6 +77,11 @@ service cloud.firestore {
         allow read, delete: if isOwner(userId);
         allow create, update: if isOwner(userId) && id == 'preferences'
           && validPreferences(request.resource.data);
+      }
+
+      match /subjects/{id} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validSubjectDoc(request.resource.data);
       }
     }
 

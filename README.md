@@ -171,7 +171,7 @@ Datumsangaben werden bewusst als kalendarische ISO-Strings ohne Uhrzeit gespeich
 
 ### Security Rules
 
-`firestore.rules` erlaubt Lesen/Schreiben ausschließlich unter `users/{uid}` für den angemeldeten Nutzer selbst, validiert alle Felder (erlaubte Fächer, Datumsformat, Textlängen, boolesche Werte, keine Fremdfelder) und sperrt alles andere. Getestet mit 6 Testfällen (eigene Daten, fremde Daten, anonym, Validierung, unbekannte Pfade):
+`firestore.rules` erlaubt Lesen/Schreiben ausschließlich unter `users/{uid}` für den angemeldeten Nutzer selbst, validiert alle Felder (Fachname inkl. eigener Fächer, Datumsformat, Textlängen, boolesche Werte, keine Fremdfelder) und sperrt alles andere. Eigene Fächer (`users/{uid}/subjects`) sind mit Name und Hex-Farbe erlaubt. Getestet mit 8 Testfällen (eigene Daten, eigene Fächer, fremde Daten, anonym, Validierung, unbekannte Pfade):
 
 ```bash
 npm run test:rules

@@ -1,10 +1,10 @@
-import { esc, toast, errorMessage } from './ui.js';
+import { esc, toast, errorMessage, $ } from './ui.js';
 import { icon, googleLogo } from './icons.js';
 import { getTheme, getTint, setTheme, setTint } from './theme.js';
 import { signInWithGoogle, logout } from './auth.js';
 import { SUBJECTS, subjectKey } from './subjects.js';
 import {
-  watchSubjects, saveSubject, deleteSubject, newSubjectId,
+  saveSubject, deleteSubject, newSubjectId,
 } from './store.js';
 
 export const APP_VERSION = __APP_VERSION__;
@@ -17,24 +17,13 @@ const THEMES = [
 ];
 
 export function createProfileView(root, ctx) {
-  let subjectsUnsub = null;
-
   function render() {
     const { user } = ctx.state;
     root.querySelector('.profile-content').innerHTML = user ? signedIn(user) : signedOut();
     if (user) {
       wireSettings();
-      // Render user subjects from current state (element was just re-created)
+      // Fächer kommen aus dem zentralen Store-Watcher (app.js) – hier nur anzeigen.
       renderSubjects(ctx.state.subjects || []);
-      // Watch user subjects only once, manage unsubscribe to avoid duplicates
-      if (!subjectsUnsub) {
-        subjectsUnsub = watchSubjects(user.uid, (subs) => {
-          renderSubjects(user.uid, subs);
-        });
-      }
-    } else if (subjectsUnsub) {
-      subjectsUnsub();
-      subjectsUnsub = null;
     }
   }
 
@@ -107,35 +96,36 @@ export function createProfileView(root, ctx) {
     </section>`;
   }
 
-  function renderSubjects(uid, subjects = []) {
+  function renderSubjects(subjects = []) {
     const host = root.querySelector('#subject-list');
     if (!host) return;
     host.innerHTML = subjects.map((s) => `
       <div class="subject-item" data-subject-id="${esc(s.id)}">
         <div class="name"><span class="dot" style="background:${esc(s.color || '#8e919b')}"></span>${esc(s.name)}</div>
         <div class="actions">
+          <button class="icon-btn" data-act="edit-subject" data-subject-id="${esc(s.id)}" aria-label="Fach ${esc(s.name)} bearbeiten">${icon('edit', 16)}</button>
           <button class="icon-btn" data-act="delete-subject" data-subject-id="${esc(s.id)}" aria-label="Fach ${esc(s.name)} löschen">${icon('delete', 16)}</button>
         </div>
       </div>
     `).join('');
   }
 
-  function addSubjectDialog(uid) {
+  function subjectDialog(isEdit, initial = { name: '', color: '#2fae5c' }) {
     return new Promise((resolve) => {
       const dlg = $('#confirm');
       dlg.innerHTML = `
-        <h2 class="dialog-title">Fach hinzufügen</h2>
+        <h2 class="dialog-title">${isEdit ? 'Fach bearbeiten' : 'Fach hinzufügen'}</h2>
         <div class="field" style="margin-bottom: 12px;">
           <label style="font-size: .77rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px;">Fachname</label>
-          <input type="text" id="new-subject-name" style="width: 100%; min-height: 45px; padding: 10px 14px; border-radius: var(--radius-s); border: 1px solid var(--outline-strong); background: var(--surface-3); color: var(--text); font: inherit;" required>
+          <input type="text" id="new-subject-name" style="width: 100%; min-height: 45px; padding: 10px 14px; border-radius: var(--radius-s); border: 1px solid var(--outline-strong); background: var(--surface-3); color: var(--text); font: inherit;" value="${esc(initial.name)}" required>
         </div>
         <div class="field" style="margin-bottom: 12px;">
           <label style="font-size: .77rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px;">Farbe</label>
-          <input type="color" id="new-subject-color" value="#2fae5c" style="width: 100%; height: 48px; border: none; border-radius: var(--radius-s); cursor: pointer;">
+          <input type="color" id="new-subject-color" value="${esc(initial.color || '#2fae5c')}" style="width: 100%; height: 48px; border: none; border-radius: var(--radius-s); cursor: pointer;">
         </div>
         <div class="dialog-actions">
           <button class="btn text" data-act="cancel" type="button">Abbrechen</button>
-          <button class="btn filled" data-act="ok" type="button">Hinzufügen</button>
+          <button class="btn filled" data-act="ok" type="button">${isEdit ? 'Speichern' : 'Hinzufügen'}</button>
         </div>`;
       let result = null;
       const onClick = (e) => {
@@ -144,7 +134,9 @@ export function createProfileView(root, ctx) {
         const nameEl = dlg.querySelector('#new-subject-name');
         const colorEl = dlg.querySelector('#new-subject-color');
         if (act === 'ok') {
-          result = { name: nameEl.value.trim(), color: colorEl.value };
+          const name = nameEl.value.trim();
+          if (!name) { nameEl.focus(); return; }
+          result = { name, color: colorEl.value };
         }
         closeDialog(dlg);
       };
@@ -158,6 +150,7 @@ export function createProfileView(root, ctx) {
       openDialog(dlg);
       const nameInput = dlg.querySelector('#new-subject-name');
       nameInput.focus();
+      nameInput.select();
     });
   }
 
@@ -195,12 +188,25 @@ export function createProfileView(root, ctx) {
     if (t.dataset.act === 'add-subject') {
       const uid = ctx.state.user?.uid;
       if (!uid) return;
-      const res = await addSubjectDialog(uid);
+      const res = await subjectDialog(false);
       if (!res) return;
       const id = newSubjectId(uid);
       try {
         await saveSubject(uid, id, { name: res.name, color: res.color });
         toast(`Fach "${esc(res.name)}" hinzugefügt`);
+      } catch (err) { toast(errorMessage(err), { type: 'error' }); }
+    }
+    if (t.dataset.act === 'edit-subject') {
+      const uid = ctx.state.user?.uid;
+      const sid = t.dataset.subjectId;
+      if (!uid || !sid) return;
+      const existing = (ctx.state.subjects || []).find((s) => s.id === sid);
+      if (!existing) return;
+      const res = await subjectDialog(true, { name: existing.name, color: existing.color });
+      if (!res) return;
+      try {
+        await saveSubject(uid, sid, { name: res.name, color: res.color });
+        toast(`Fach "${esc(res.name)}" gespeichert`);
       } catch (err) { toast(errorMessage(err), { type: 'error' }); }
     }
     if (t.dataset.act === 'delete-subject') {

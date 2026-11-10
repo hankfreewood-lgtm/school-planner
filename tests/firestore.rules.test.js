@@ -35,6 +35,16 @@ test('Eigene Tests und Einstellungen funktionieren', async () => {
   await assertSucceeds(setDoc(doc(alice(), 'users/alice'), { displayName: 'A', email: 'a@x.de', photoURL: '', createdAt: new Date(), lastLoginAt: new Date() }));
 });
 
+test('Eigene Fächer funktionieren und sind auf den Besitzer beschränkt', async () => {
+  const d = doc(alice(), 'users/alice/subjects/s1');
+  await assertSucceeds(setDoc(d, { name: 'Darstellendes Spiel', color: '#2fae5c' }));
+  await assertSucceeds(getDoc(d));
+  await assertSucceeds(getDocs(collection(alice(), 'users/alice/subjects')));
+  await assertSucceeds(deleteDoc(d));
+  await assertFails(getDocs(collection(bob(), 'users/alice/subjects')));
+  await assertFails(setDoc(doc(bob(), 'users/alice/subjects/s2'), { name: 'Sport', color: '#2fae5c' }));
+});
+
 test('Fremde Daten: Lesen, Schreiben, Löschen und Listen verboten', async () => {
   await env.withSecurityRulesDisabled(async (ctx) => {
     await setDoc(doc(ctx.firestore(), 'users/alice/homework/h1'), hw());
@@ -55,9 +65,16 @@ test('Nicht angemeldet: alles verboten', async () => {
   await assertFails(getDocs(collection(anon(), 'users/alice/tests')));
 });
 
+test('Eigene (benutzerdefinierte) Fächer sind für Einträge erlaubt', async () => {
+  const col = (p) => doc(alice(), `users/alice/${p}`);
+  await assertSucceeds(setDoc(col('homework/custom'), hw({ subject: 'Darstellendes Spiel' })));
+  await assertSucceeds(setDoc(col('tests/custom'), t({ subject: 'Darstellendes Spiel' })));
+});
+
 test('Validierung: ungültige Daten werden abgelehnt', async () => {
   const col = (p) => doc(alice(), `users/alice/${p}`);
-  await assertFails(setDoc(col('homework/x1'), hw({ subject: 'Hacking' })));
+  await assertFails(setDoc(col('homework/x1'), hw({ subject: '' })));
+  await assertFails(setDoc(col('homework/x1b'), hw({ subject: 'a'.repeat(61) })));
   await assertFails(setDoc(col('homework/x2'), hw({ dueDate: '06.11.2026' })));
   await assertFails(setDoc(col('homework/x3'), hw({ content: '' })));
   await assertFails(setDoc(col('homework/x4'), hw({ content: 'a'.repeat(1001) })));
@@ -66,6 +83,10 @@ test('Validierung: ungültige Daten werden abgelehnt', async () => {
   await assertFails(setDoc(col('tests/x7'), t({ testDate: 12345 })));
   await assertFails(setDoc(col('settings/other'), { theme: 'dark', subjectTint: true }));
   await assertFails(setDoc(col('settings/preferences'), { theme: 'neon', subjectTint: true }));
+  await assertFails(setDoc(col('subjects/bad1'), { name: '', color: '#2fae5c' }));
+  await assertFails(setDoc(col('subjects/bad2'), { name: 'Sport', color: 'green' }));
+  await assertFails(setDoc(col('subjects/bad3'), { name: 'Sport' }));
+  await assertFails(setDoc(col('subjects/bad4'), { name: 'Sport', color: '#2fae5c', evil: 1 }));
 });
 
 test('Unbekannte Pfade sind gesperrt', async () => {
